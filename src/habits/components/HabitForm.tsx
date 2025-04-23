@@ -1,6 +1,5 @@
 import * as React from "react";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,39 +19,69 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { useEffect } from "react";
+
+// Types
+interface Habit {
+  name: string;
+  frequency: string;
+}
 
 export default function HabitForm() {
-  interface Habit {
-    name: string;
-    category: string;
-  }
+  // State
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
 
-  const habitSchema = z.object({
-    name: z.string().min(3),
-    category: z.string(),
-  });
-
-  const [habit, setHabit] = useState<Habit[]>([]);
-  const [errors, setErrors] = useState<{[ key:string ]:string[]}>({});
+  // Functions
+  useEffect(() => {
+    const localStorageData = JSON.parse(localStorage.getItem("habits") || "[]");
+    setHabits(localStorageData);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const name = formData.get("name") as string;
-    const category = formData.get("category") as string;
+    
+    const frequency = formData.get("frequency") as string;
+    validateForm(name, frequency);
+  };
 
+  // Validations
+  const habitSchema = z.object({
+    name: z.string().min(3),
+    frequency: z.enum(["daily", "weekly", "monthly"]),
+  });
+
+  const validateForm = (name: string, frequency: string) => {
     try {
-      const validate = habitSchema.parse({ name, category });
-      setHabit([...habit, validate]);
+      // Validate the form data
+      const validate = habitSchema.parse({ name, frequency });
+      //Check duplicates
+      for (const habit of habits) {
+        if (habit.name === validate.name) {
+          setErrors({ name: ["Habit already exists"] });
+          return;
+        }
+      }
+      // Update the habit state
+      const updatedHabits = [...habits, validate];
+      setHabits(updatedHabits);
+      // Update the local storage
+      localStorage.setItem("habits", JSON.stringify(updatedHabits));
+      // Reset the form
+
     } catch (error) {
+      // Handle validation errors
       if (error instanceof z.ZodError) {
-        const fieldErrors: {[ key:string ]:string[]} = {};
+        const fieldErrors: { [key: string]: string[] } = {};
         error.errors.forEach((err) => {
           const field = err.path[0] as string;
           if (!fieldErrors[field]) {
             fieldErrors[field] = [];
           }
           fieldErrors[field].push(err.message);
+          console.log(fieldErrors);
         });
         setErrors(fieldErrors);
         console.error("Validation error:", error.errors);
@@ -79,23 +108,25 @@ export default function HabitForm() {
                   name="name"
                   placeholder="Enter your habit name"
                 />
-                { errors.name && (
+                {errors.name && (
                   <p className="text-red-500 text-sm">{errors.name}</p>
                 )}
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="category">Category</Label>
-                <Select name="category">
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="Select category" />
+                <Label htmlFor="frequency">Frequency</Label>
+                <Select name="frequency">
+                  <SelectTrigger id="frequency">
+                    <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                   <SelectContent position="popper">
-                    <SelectItem value="health">Health</SelectItem>
-                    <SelectItem value="fitness">Fitness</SelectItem>
-                    <SelectItem value="productivity">Productivity</SelectItem>
-                    <SelectItem value="mindfulness">Mindfulness</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
                   </SelectContent>
                 </Select>
+                { errors.frequency && (
+                  <p className="text-red-500 text-sm">{errors.frequency}</p>
+                )}
               </div>
             </div>
           </form>
@@ -105,7 +136,7 @@ export default function HabitForm() {
           <Button type="submit" form="habitForm">
             Create
           </Button>
-          <pre>{JSON.stringify(habit)}</pre>
+          <pre>{JSON.stringify(habits)}</pre>
         </CardFooter>
       </Card>
     </div>
