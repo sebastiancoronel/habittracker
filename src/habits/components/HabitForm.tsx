@@ -1,3 +1,4 @@
+//Componentes: Renderizado y manejo de eventos
 import * as React from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -20,73 +21,20 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { useEffect } from "react";
-
-// Types
-interface Habit {
-  name: string;
-  frequency: string;
-}
+import { Habit } from "@/habits/types";
+import { HabitService } from "@/habits/services/habitService";
+import { useHabitForm } from "@/habits/hooks/useHabitForm";
 
 export default function HabitForm() {
-  // State
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
-
-  // Functions
-  useEffect(() => {
-    const localStorageData = JSON.parse(localStorage.getItem("habits") || "[]");
-    setHabits(localStorageData);
-  }, []);
+  const { errors, validateForm } = useHabitForm();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const name = formData.get("name") as string;
-    
+
     const frequency = formData.get("frequency") as string;
     validateForm(name, frequency);
-  };
-
-  // Validations
-  const habitSchema = z.object({
-    name: z.string().min(3),
-    frequency: z.enum(["daily", "weekly", "monthly"]),
-  });
-
-  const validateForm = (name: string, frequency: string) => {
-    try {
-      // Validate the form data
-      const validate = habitSchema.parse({ name, frequency });
-      //Check duplicates
-      for (const habit of habits) {
-        if (habit.name === validate.name) {
-          setErrors({ name: ["Habit already exists"] });
-          return;
-        }
-      }
-      // Update the habit state
-      const updatedHabits = [...habits, validate];
-      setHabits(updatedHabits);
-      // Update the local storage
-      localStorage.setItem("habits", JSON.stringify(updatedHabits));
-      // Reset the form
-
-    } catch (error) {
-      // Handle validation errors
-      if (error instanceof z.ZodError) {
-        const fieldErrors: { [key: string]: string[] } = {};
-        error.errors.forEach((err) => {
-          const field = err.path[0] as string;
-          if (!fieldErrors[field]) {
-            fieldErrors[field] = [];
-          }
-          fieldErrors[field].push(err.message);
-          console.log(fieldErrors);
-        });
-        setErrors(fieldErrors);
-        console.error("Validation error:", error.errors);
-      }
-    }
   };
 
   return (
@@ -124,7 +72,7 @@ export default function HabitForm() {
                     <SelectItem value="monthly">Monthly</SelectItem>
                   </SelectContent>
                 </Select>
-                { errors.frequency && (
+                {errors.frequency && (
                   <p className="text-red-500 text-sm">{errors.frequency}</p>
                 )}
               </div>
@@ -136,7 +84,7 @@ export default function HabitForm() {
           <Button type="submit" form="habitForm">
             Create
           </Button>
-          <pre>{JSON.stringify(habits)}</pre>
+          {/* <pre>{JSON.stringify(habits)}</pre> */}
         </CardFooter>
       </Card>
     </div>
