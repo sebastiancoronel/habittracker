@@ -2,11 +2,10 @@
 import { Habit } from "@/habits/types";
 
 export const HabitService = {
-
-    getAll: (): Habit[] =>{
-        const localStorageData = JSON.parse(localStorage.getItem("habits") || "[]");
-        return localStorageData;
-    },
+  getAll: (): Habit[] => {
+    const localStorageData = JSON.parse(localStorage.getItem("habits") || "[]");
+    return localStorageData;
+  },
 
   save: (habit: Habit): void => {
     const currentHabits = HabitService.getAll();
@@ -14,9 +13,21 @@ export const HabitService = {
     localStorage.setItem("habits", JSON.stringify(updatedHabits));
   },
 
-  exists: (name:string)=>{
+  delete: (name: string) => {
+    let currentHabits = localStorage.getItem("habits");
+    if (!currentHabits) {
+      return false;
+    }
+    const currentHabitsParsed = JSON.parse(currentHabits);
+    const currentHabitsFiltered = currentHabitsParsed.filter(
+      (habit: Habit) => habit.name !== name
+    );
+    localStorage.setItem("habits", JSON.stringify(currentHabitsFiltered));
+  },
+
+  exists: (name: string) => {
     const currentHabits = HabitService.getAll();
-    const exists = currentHabits.some((habit)=>habit.name === name)
+    const exists: boolean = currentHabits.some((habit) => habit.name === name);
     return exists;
-  }
+  },
 };

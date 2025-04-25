@@ -24,22 +24,20 @@ export const useHabitForm = () => {
   const validateForm = (name: string, frequency: string) => {
     try {
       const validate = habitSchema.parse({ name, frequency });
-      
+
       if (HabitService.exists(validate.name)) {
-        setErrors({name:["Habit already exists"]})
+        setErrors({ name: ["Habit already exists"] });
         return false;
       }
 
       HabitService.save(validate);
-      //todo: Reset the form
-      //! Its just reseting the input but the select.
       setErrors({});
-    const formElement = document.getElementById("habitForm") as HTMLFormElement;
-    if (formElement) {
-      formElement.reset();
-    }
-
-    
+      const formElement = document.getElementById(
+        "habitForm"
+      ) as HTMLFormElement;
+      if (formElement) {
+        formElement.reset();
+      }
     } catch (error) {
       // Handle validation errors
       if (error instanceof z.ZodError) {
@@ -58,5 +56,9 @@ export const useHabitForm = () => {
     }
   };
 
-  return { habits, errors, validateForm };
+  const deleteHabit = (name: string) => {
+    HabitService.delete(name);
+  };
+
+  return { habits, errors, validateForm, deleteHabit };
 };
