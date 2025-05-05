@@ -8,7 +8,9 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useHabitForm } from "@/habits/hooks/useHabitForm";
+import { useDispatch } from "react-redux";
+import { markAsCompleted } from "@/state/markAsCompleted/markAsCompletedSlice";
+
 export default function HabitCard({
   name,
   frequency,
@@ -16,7 +18,11 @@ export default function HabitCard({
   name: string;
   frequency: string;
 }) {
-  const { deleteHabit } = useHabitForm();
+  const dispatch = useDispatch();
+
+  const handleComplete = () => {
+    dispatch(markAsCompleted({ name }));
+  };
 
   return (
     <div>
@@ -26,8 +32,8 @@ export default function HabitCard({
         </CardHeader>
         <CardContent>{frequency}</CardContent>
         <CardFooter className="flex items-center gap-2">
-          <Checkbox id="completed-today" onClick={() => deleteHabit(name)} />
-          <Label htmlFor="completed-today">Completed today</Label>
+          <Checkbox id="completed-today" onClick={handleComplete} />
+          <Label htmlFor="completed-today">Done</Label>
         </CardFooter>
       </Card>
     </div>

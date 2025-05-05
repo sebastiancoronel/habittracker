@@ -1,12 +1,13 @@
 import React from "react";
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import HabitCard from "./HabitCard";
-import { useHabitForm } from "@/habits/hooks/useHabitForm";
+
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
+import { Habit } from "@/habits/types";
 
 export default function HabitList() {
-  const { habits} = useHabitForm();
-
+  const { habits } = useSelector((state: RootState) => state.markAsCompleted);
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -15,10 +16,16 @@ export default function HabitList() {
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-10">
           {habits &&
-            habits.map((habit: any) => {
+            habits.map((habit: Habit) => {
               return (
                 <>
-                  <HabitCard name={habit.name} frequency={habit.frequency} />
+                  {!habit.completionDate && (
+                    <HabitCard
+                      key={habit.name}
+                      name={habit.name}
+                      frequency={habit.frequency}
+                    />
+                  )}
                 </>
               );
             })}

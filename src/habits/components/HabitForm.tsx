@@ -1,6 +1,5 @@
 //Componentes: Renderizado y manejo de eventos
 import * as React from "react";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,10 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
-import { useEffect } from "react";
-import { Habit } from "@/habits/types";
-import { HabitService } from "@/habits/services/habitService";
 import { useHabitForm } from "@/habits/hooks/useHabitForm";
 
 export default function HabitForm() {
@@ -32,8 +27,8 @@ export default function HabitForm() {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const name = formData.get("name") as string;
-
     const frequency = formData.get("frequency") as string;
+
     validateForm(name, frequency);
   };
 

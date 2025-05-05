@@ -3,17 +3,20 @@ import { useEffect, useState } from "react";
 import { Habit } from "@/habits/types";
 import { HabitService } from "@/habits/services/habitService";
 import { z } from "zod";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 export const useHabitForm = () => {
   // State
   const [habits, setHabits] = useState<Habit[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
+  const habitState = useSelector((state: RootState) => state.markAsCompleted);
 
   // Functions
   useEffect(() => {
     const habits = HabitService.getAll();
     setHabits(habits);
-  }, []);
+  }, [habitState]);
 
   // Validations
   const habitSchema = z.object({
@@ -58,6 +61,7 @@ export const useHabitForm = () => {
 
   const deleteHabit = (name: string) => {
     HabitService.delete(name);
+    setHabits(HabitService.getAll());
   };
 
   return { habits, errors, validateForm, deleteHabit };

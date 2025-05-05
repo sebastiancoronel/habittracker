@@ -13,16 +13,32 @@ export const HabitService = {
     localStorage.setItem("habits", JSON.stringify(updatedHabits));
   },
 
-  delete: (name: string) => {
+  delete: (name: string): boolean => {
     let currentHabits = localStorage.getItem("habits");
     if (!currentHabits) {
       return false;
     }
+    const date = new Date();
+    const formatedDate = date.toISOString().split("T")[0];
+
     const currentHabitsParsed = JSON.parse(currentHabits);
-    const currentHabitsFiltered = currentHabitsParsed.filter(
+    const currentHabit = currentHabitsParsed.find(
+      (habit: Habit) => habit.name === name
+    );
+
+    if (currentHabit) {
+      currentHabit.completionDate = formatedDate;
+    }
+
+    const habitsWithoutCurrent = currentHabitsParsed.filter(
       (habit: Habit) => habit.name !== name
     );
-    localStorage.setItem("habits", JSON.stringify(currentHabitsFiltered));
+
+    habitsWithoutCurrent.push(currentHabit);
+
+    localStorage.setItem("habits", JSON.stringify(currentHabitsParsed));
+    console.log(currentHabitsParsed);
+    return currentHabitsParsed.length !== habitsWithoutCurrent.length;
   },
 
   exists: (name: string) => {
