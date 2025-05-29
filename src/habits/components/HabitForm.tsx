@@ -58,13 +58,19 @@ export default function HabitForm() {
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="frequency">Frequency</Label>
                 <Select name="frequency">
-                  <SelectTrigger id="frequency">
+                  <SelectTrigger id="frequency" aria-label="Frequency">
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                   <SelectContent position="popper">
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="daily" data-testid="Daily">
+                      Daily
+                    </SelectItem>
+                    <SelectItem value="weekly" data-testid="Weekly">
+                      Weekly
+                    </SelectItem>
+                    <SelectItem value="monthly" data-testid="Monthly">
+                      Monthly
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.frequency && (
@@ -76,7 +82,7 @@ export default function HabitForm() {
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline">Cancel</Button>
-          <Button type="submit" form="habitForm">
+          <Button type="submit" form="habitForm" data-testid="createBtn">
             Create
           </Button>
           {/* <pre>{JSON.stringify(habits)}</pre> */}
